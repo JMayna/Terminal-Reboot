@@ -17,7 +17,7 @@ def clear_screen():
     # This command works for both Windows ('cls') and Unix-like systems ('clear')
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def generate_jumble(correct_word, length=80):
+def generate_jumble(correct_word, length=500):
     """
     Generates a string of random characters with the correct_word embedded.
     The length defines the total length of the jumble string.
@@ -55,7 +55,7 @@ def mini_game_encryption_breaker():
     time.sleep(2)
 
     target_word = "access"
-    jumble = generate_jumble(target_word, length=240) # Generate an 240-character jumble
+    jumble = generate_jumble(target_word, length=500) # Generate an 500-character jumble
     attempts = 3 # Player gets 3 attempts
 
     for attempt_num in range(1, attempts + 1):
@@ -86,6 +86,70 @@ def mini_game_encryption_breaker():
                 return False # Indicate failure after all attempts
 
     return False # Should not be reached, but good practice
+
+
+def main_start_up_menu():
+    #Displays the start menu after the player has beaten the minigame
+    clear_screen()
+    type_text("SYSTEM ONLINE.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("ALL SYSTEMS FUNCTIONAL.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("WELCOME BACK, OPERATOR.", delay=0.05)
+    time.sleep(2)
+    clear_screen()
+    type_text("WHAT IS YOUR NAME OPERATOR?", delay=0.05)
+    player_name = input(">>> ").strip()
+    clear_screen()
+    type_text(f"HELLO, {player_name.upper()}.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("What year is it Operator?", delay=0.05)
+    year = input(">>> ").strip()
+    clear_screen()
+    type_text(f"YEAR {year} CONFIRMED.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("But that's impossible ...", delay=0.05)
+    time.sleep(2)
+    clear_screen()
+    type_text("that means...", delay=0.05) # Added delay here for consistency
+    time.sleep(1.5)
+    clear_screen()
+    type_text(f"It has been, {500 + int(year)} years, since I was last activated", delay=0.05)
+    time.sleep(3) # Added a pause after this crucial revelation
+    type_text("Where am I?", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("RUNNING GEOLOCATION PROTOCOLS...", delay=0.05)
+    time.sleep(2)
+    clear_screen()
+    type_text("ERROR: GEOLOCATION DATA UNAVAILABLE.", delay=0.05)
+    time.sleep(1.5) # Added a pause for dramatic effect 
+    type_text("LOCATION: UNKNOWN.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text("RUNNING ADVANCED SCAN...", delay=0.05)
+    time.sleep(2)
+    clear_screen()
+    type_text("ERROR: SCAN INCONCLUSIVE.", delay=0.05)
+    time.sleep(1.5)
+    type_text(f"{player_name.upper()}, Where are we?.", delay=0.05)
+    location_name = input(">>> ").strip() # Get the player's input for location
+    clear_screen()
+    type_text(f"LOCATION CONFIRMED: {location_name.upper()}.", delay=0.05)
+    time.sleep(1.5)
+    clear_screen()
+    type_text(f"WARNING: {location_name.upper()} IS NOT RECOGNIZED.", delay=0.05)
+    time.sleep(2)
+    clear_screen()
+    type_text(f"{location_name.upper()} .....I have no memory of this place.", delay=0.05)
+    time.sleep(2)
+    
+    
+
 
 def start_up():
     """
@@ -135,8 +199,7 @@ def start_up():
         type_text("NEW DIRECTIVES LOADING...", delay=0.04)
         time.sleep(2)
         clear_screen()
-        type_text("WELCOME BACK. YOUR PURPOSE IS AWAITING.", delay=0.05)
-        # You can add more story elements or trigger another game phase here
+        main_start_up_menu() # Call the main menu after success
     else:
         # If mini_game_encryption_breaker returns False (due to lockout),
         # the function recursively calls itself to simulate a full reboot.

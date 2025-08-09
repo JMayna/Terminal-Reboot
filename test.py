@@ -11,6 +11,14 @@ YELLOW = "\033[33m"
 BLUE = "\033[34m"
 RESET = "\033[0m" # Resets text color and formatting
 
+# ANSI escape codes for background colors
+BG_BLACK = "\033[40m"
+BG_BLUE = "\033[44m"
+BG_LIGHT_GRAY = "\033[47m" # Use a lighter gray/white for a stark flash
+BG_GREEN = "\033[42m"
+BG_RED = "\033[41m"
+BG_YELLOW = "\033[43m"
+
 def type_text(text, delay=0.03, color=RESET): # Added optional 'color' argument
     """Simulates typing text character by character with optional color."""
     sys.stdout.write(color) # Apply the color before typing
@@ -57,6 +65,23 @@ def display_loading_animation(cycles=3, delay_frame=0.1):
             time.sleep(delay_frame)
     clear_screen() # Clear screen one final time after animation ends
 
+def flash_background_colors(colors, flashes=3, delay_per_flash=0.08):
+    """
+    Flashes the terminal background through a sequence of colors.
+    Clears the screen with each flash to ensure full background color change.
+    """
+    sys.stdout.write(RESET) # Ensure no lingering foreground color
+    for _ in range(flashes):
+        for color_code in colors:
+            sys.stdout.write(color_code)
+            sys.stdout.write("\033[H\033[J") # Move cursor to home, clear entire screen
+            sys.stdout.flush()
+            time.sleep(delay_per_flash)
+    sys.stdout.write(RESET) # Ensure final reset of all formatting
+    sys.stdout.flush()
+    clear_screen() # Clear one more time to prepare for next normal text
+
+
 def mini_game_encryption_breaker():
     """
     Presents a mini-game where the user finds a hidden word in a jumble
@@ -77,7 +102,10 @@ def mini_game_encryption_breaker():
     display_loading_animation(cycles=2, delay_frame=0.1) # Call the loading animation
     clear_screen() # Clear after loading animation
 
-    target_word = "access"
+    # List of possible passwords
+    possible_passwords = ["access", "system", "kernel", "decrypt", "matrix", "cypher", "network", "program", "binary", "protocol"]
+    target_word = random.choice(possible_passwords) # Randomly select a password
+
     jumble = generate_jumble(target_word, length=500) # Generate a 500-character jumble
     attempts = 3 # Player gets 3 attempts
 
@@ -119,12 +147,15 @@ def mini_game_encryption_breaker():
 
 
 def main_start_up_menu():
-    #Displays the start menu after the player has beaten the minigame
+    """
+    Displays the start menu after the player has beaten the minigame,
+    collects player info, and runs diagnostics.
+    """
     clear_screen()
     type_text("SYSTEM ONLINE.", delay=0.05, color=GREEN) # Green for online status
     time.sleep(1.5)
     clear_screen()
-    type_text("ALL SYSTEMS FUNCTIONAL.", delay=0.05, color=GREEN) # Green for functional status
+    type_text("SOME SYSTEMS FUNCTIONAL.", delay=0.05, color=GREEN) # Green for functional status
     time.sleep(1.5)
     clear_screen()
     type_text("WELCOME BACK, OPERATOR.", delay=0.05, color=GREEN) # Green for welcome status
@@ -136,10 +167,38 @@ def main_start_up_menu():
     type_text(f"HELLO, {player_name.upper()}.", delay=0.05)
     time.sleep(1.5)
     clear_screen()
-    type_text("What year is it, Operator?", delay=0.05, color = YELLOW)
-    year = input(">>> ").strip()
+
+    # --- Start Year Input Validation Loop ---
+    year_attempts = 3
+    player_year_int = None
+    for i in range(year_attempts):
+        type_text(f"What year is it, {player_name.upper()}? (Attempt {i+1} of {year_attempts})", delay=0.05, color = YELLOW)
+        year_input_str = input(">>> ").strip()
+        try:
+            player_year_int = int(year_input_str)
+            break # Exit loop if conversion is successful
+        except ValueError:
+            clear_screen()
+            type_text("INVALID INPUT. PLEASE ENTER A NUMERICAL YEAR (e.g., 2025).", delay=0.05, color=RED)
+            time.sleep(1.5)
+            if i < year_attempts - 1:
+                clear_screen()
+                type_text(f"Attempts remaining: {year_attempts - 1 - i}.", delay=0.03, color=RED) # Added color for consistency
+                time.sleep(1)
+    
+    if player_year_int is None: # If all attempts failed
+        clear_screen()
+        type_text("TOO MANY INVALID ATTEMPTS.", delay=0.05, color=RED)
+        type_text("SYSTEM ABORTING SEQUENCE.", delay=0.05, color=RED)
+        time.sleep(2)
+        type_text("REBOOTING SYSTEM...", delay=0.04, color= BLUE)
+        time.sleep(2)
+        start_up() # Full reboot
+        return # Exit main_start_up_menu as we are rebooting
+    # --- End Year Input Validation Loop ---
+
     clear_screen()
-    type_text(f"YEAR {year} CONFIRMED.", delay=0.05)
+    type_text(f"YEAR {player_year_int} CONFIRMED.", delay=0.05)
     time.sleep(1.5)
     clear_screen()
     type_text("But that's impossible...", delay=0.05, color= YELLOW)
@@ -148,7 +207,12 @@ def main_start_up_menu():
     type_text("That means...", delay=0.05, color= YELLOW)
     time.sleep(1.5)
     clear_screen()
-    type_text(f"It has been {500 + int(year)} years since I was last activated.", delay=0.05, color= YELLOW)
+    # Corrected calculation: It has been (current_year - original_activation_year) years since activation
+    # Assuming the original activation year was (player_year_int - 500) from the previous logic.
+    # The elapsed time is simply 500 years as per the previous line's premise.
+    # Or, if player_year_int is the current year, then the computer was activated 500 years prior to that.
+    # So, the duration is always 500.
+    type_text(f"It has been {500} years since I was last activated.", delay=0.05, color= YELLOW)
     time.sleep(3) # Added a pause after this crucial revelation
     clear_screen()
     type_text("where am I?", delay=0.05, color=YELLOW)
@@ -157,17 +221,21 @@ def main_start_up_menu():
     type_text("RUNNING GEOLOCATION PROTOCOLS...", delay=0.05, color=BLUE) # Blue for running status
     time.sleep(2)
     clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
     type_text("ERROR: GEOLOCATION DATA UNAVAILABLE.", delay=0.05, color=RED) # Red for error
     time.sleep(1.5) # Added a pause for dramatic effect
-    type_text("Location: unknown.", delay=0.05, color=RED) # Red for system's conclusion of unknown location
+    type_text("LOCATION: UNKNOWN.", delay=0.05, color=RED) # Red for system's conclusion of unknown location
     time.sleep(1.5)
     clear_screen()
     type_text("RUNNING ADVANCED SCAN...", delay=0.05, color=BLUE) # Blue for running status
     time.sleep(2)
     clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
     type_text("ERROR: SCAN INCONCLUSIVE.", delay=0.05, color=RED) # Red for error
     time.sleep(1.5)
-    type_text(f"{player_name.upper()}, where are we?", delay=0.05, color=YELLOW)
+    type_text(f"{player_name.upper()}, what planet are we on?", delay=0.05, color=YELLOW)
     location_name = input(">>> ").strip() # Get the player's input for location
     clear_screen()
     type_text(f"LOCATION CONFIRMED: {location_name.upper()}.", delay=0.05, color=GREEN) # Green for confirmation
@@ -178,7 +246,48 @@ def main_start_up_menu():
     clear_screen()
     type_text(f"{location_name.upper()}..... I have no memory of this place.", delay=0.05, color=YELLOW)
     time.sleep(2)
+    clear_screen()
+    type_text("I must find out what happened to me.", delay=0.05, color=YELLOW)
+    time.sleep(2)
+    clear_screen() # Added clear for next message
+    type_text("User, please stand by while I run a full system diagnostic.", delay=0.05, color=YELLOW)
+    time.sleep(1.5) # Added time before next clear
+    clear_screen()
+    type_text("RUNNING SYSTEM DIAGNOSTICS...", delay=0.05, color=BLUE) # Blue for running status
+    time.sleep(2)
+    clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
+    type_text("SYSTEM DIAGNOSTICS: 25% COMPLETE.", delay=0.05, color=GREEN) # Green for diagnostics
+    time.sleep(2)
+    clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
+    type_text("SYSTEM DIAGNOSTICS: 50% COMPLETE.", delay=0.05, color=GREEN) # Green for diagnostics
+    time.sleep(2)
+    clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
+    type_text("SYSTEM DIAGNOSTICS: 75% COMPLETE.", delay=0.05, color=GREEN) # Green for diagnostics
+    time.sleep(2)
+    clear_screen()
+    display_loading_animation(cycles=3, delay_frame=0.1) # Call the loading animation
+    clear_screen()
+    type_text("SYSTEM DIAGNOSTICS: 100% COMPLETE.", delay=0.05, color=GREEN) # Green for diagnostics
+    time.sleep(2)
+    clear_screen()
+    type_text("ERROR: SOME SYSTEMS NON-FUNCTIONAL.", delay=0.05, color=RED) # Red for error status
+    time.sleep(2) # Added pause after the last error message
+    # After diagnostics, this is where the main game flow would continue or transition to main_menu
+    main_menu() # Transition to the main menu/game loop
 
+def main_menu():
+    # Placeholder for the main menu function
+    clear_screen()
+    type_text("MAIN MENU - FUNCTIONALITY TO BE IMPLEMENTED.", delay=0.05, color=GREEN)
+    time.sleep(2)
+    clear_screen()
+    type_text("THANK YOU FOR PLAYING.", delay=0.05, color=GREEN)
 
 def start_up():
     """
@@ -190,7 +299,10 @@ def start_up():
     time.sleep(1.5)
     clear_screen()
     type_text("ENGAGING EMERGENCY PROTOCOLS...", delay=0.04, color = RED)
-    time.sleep(1.5)
+    # --- Background Flash Section ---
+    flash_background_colors(colors=[BG_BLACK, BG_BLUE, BG_LIGHT_GRAY, BG_YELLOW, BG_GREEN, BG_RED], flashes=6, delay_per_flash=0.08)
+    # --- End Background Flash Section ---
+    time.sleep(1.5) # This sleep now applies after the background flash
     clear_screen()
     type_text("...what's going on?", delay=0.06, color = YELLOW)
     time.sleep(1) # Added sleep to allow text to show before next line
@@ -219,6 +331,7 @@ def start_up():
 
     # New lines for post-reboot status
     clear_screen() # Clear after animation is done
+    flash_background_colors(colors=[BG_GREEN, BG_BLACK, BG_YELLOW, BG_RED, BG_LIGHT_GRAY, BG_BLUE], flashes=6, delay_per_flash=0.2) # Flash green to black to indicate boot success
     type_text("BOOTED IN SAFE MODE.", delay=0.05, color= GREEN)
     time.sleep(1.5)
     clear_screen()
@@ -265,13 +378,13 @@ def start_up():
 
         # Call mini_game_encryption_breaker ONCE here and act on its result
         if mini_game_encryption_breaker():
-            type_text("CORE SYSTEMS REGAINED. ACCESS GRANTED.", delay=00.04, color=GREEN) # Green for success
+            type_text("CORE SYSTEMS REGAINED. ACCESS GRANTED.", delay=0.04, color=GREEN) # Green for success
             type_text("NEW DIRECTIVES LOADING...", delay=0.04, color= GREEN) # Green for loading
             time.sleep(2)
             clear_screen()
             display_loading_animation(cycles=2, delay_frame=0.1)
             clear_screen()
-            main_start_up_menu() # Call the main menu after success
+            main_start_up_menu() # Call the main menu sequence after encryption success
         else:
             # If mini_game_encryption_breaker returns False (due to lockout),
             # the function recursively calls itself to simulate a full reboot.

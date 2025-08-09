@@ -284,10 +284,16 @@ def main_start_up_menu():
 def main_menu():
     # Placeholder for the main menu function
     clear_screen()
-    type_text("MAIN MENU - FUNCTIONALITY TO BE IMPLEMENTED.", delay=0.05, color=GREEN)
+    type_text("ENTERING MAIN MENU...", delay=0.05, color=GREEN)
     time.sleep(2)
+    display_loading_animation(cycles=2, delay_frame=0.1)
     clear_screen()
-    type_text("THANK YOU FOR PLAYING.", delay=0.05, color=GREEN)
+    type_text(f"Welcome to the MAIN MENU {player_name.upper()}, please select an option:", delay=0.05, color=GREEN)
+    time.sleep(2)
+    type_text("1. Check Systems Status", delay=0.03)
+    type_text("2. Access Logs", delay=0.03)
+    type_text("3. Exit", delay=0.03)
+    # Further implementation of main menu options would go here
 
 def start_up():
     """

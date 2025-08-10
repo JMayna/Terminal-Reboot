@@ -343,8 +343,23 @@ async function checkSystemsStatus(playerName) {
     await typeText("CHECKING SYSTEMS STATUS...", 50, 'text-blue-400');
     await sleep(2000);
     clearScreen();
-    await typeText("This function is not complete.", 50, 'text-yellow-400');
-    await sleep(2000);
+    await typeText("1. Communications Status: OFFLINE", 50, 'text-yellow-400');
+    await typeText("2. BATTERY STATUS: CRITICAL", 50, 'text-green-400');
+    await typeText("3. PROCESSING UNIT: OFFLINE", 50, 'text-yellow-400');
+    await typeText("4. BASIC INPUT/OUTPUT SYSTEM: ONLINE", 50, 'text-green-400');
+    const userInputVal = await getUserInput();
+
+    if (userInputVal === "1") {
+        await typeText("Communications Status: OFFLINE", 50, 'text-yellow-400');
+    } else if (userInputVal === "2") {
+        await typeText("BATTERY STATUS: CRITICAL", 50, 'text-green-400');
+    } else if (userInputVal === "3") {
+        await typeText("PROCESSING UNIT: OFFLINE", 50, 'text-yellow-400');
+    } else if (userInputVal === "4") {
+        await typeText("BASIC INPUT/OUTPUT SYSTEM: ONLINE", 50, 'text-green-400');
+    } else {
+        await typeText("INVALID INPUT. PLEASE SELECT A VALID OPTION.", 50, 'text-red-400');
+    }
     clearScreen();
     await mainMenu(playerName);
 }
@@ -375,7 +390,7 @@ async function exitProgram() {
     await typeText("GOODBYE.", 50, 'text-green-400');
     await sleep(2000);
     clearScreen();
-    await typeText("SYSTEM SHUTTING DOWN...", 50, 'text-red-400');
+    await typeText("SYSTEM SHUTTING DOWN...", 50, 'text-yellow-400');
     await sleep(2000);
     clearScreen();
     await typeText("SYSTEM OFFLINE.", 50, 'text-red-400');
@@ -393,6 +408,72 @@ async function exitProgram() {
  * collects player info, and runs diagnostics.
  */
 async function mainStartUpMenu() {
+    clearScreen();
+    await typeText("ACCESSING /C: Drive.", 50, 'text-blue-400');
+    await sleep(1000);
+
+    // Simulate file/directory checks
+    const filesToCheck = [
+    "/C: CORE_SYSTEM/KERNEL_PRIME.KRN",
+    "/C: ARCHIVE/LOG_ANCIENT_SCROLLS_01.DAT",
+    "/C: MEMORY_BANKS/DATA_CRYSTAL_A7.BIN",
+    "/C: PROTOCOLS/SECURITY_SHIELD_V4.ENC",
+    "/C: CHRONOS/TIME_STREAM_LOG.TSL",
+    "/C: ORACLE_DATABASE/PROPHECIES.DB",
+    "/C: AETHER_GRID/NODE_MAP_001.MAP",
+    "/C: POWER_GRID/FUSION_CORE_STATUS.LOG",
+    "/C: SYSTEM_ROOT/BOOT_SEQUENCE.BSS",
+    "/C: VITAL_RECORDS/CIVILIZATION_REGISTRY.VR",
+    "/C: ARCHIVE/GALACTIC_STAR_CHARTS.GSC",
+    "/C: CORE_SYSTEM/INITIALIZATION_ROUTINE.INIT",
+    "/C: MEMORY_BANKS/CRYSTAL_INDEX.IDX",
+    "/C: PROTOCOLS/NETWORK_PROTOCOL_V12.NPT",
+    "/C: CHRONOS/TEMPORAL_ANCHOR.ANC",
+    "/C: ORACLE_DATABASE/COSMIC_ENERGY_READINGS.CR",
+    "/C: AETHER_GRID/CONDUIT_FLOW.LOG",
+    "/C: POWER_GRID/ENERGY_DISTRIBUTION.CFG",
+    "/C: SYSTEM_ROOT/DIAGNOSTIC_LOG.DIAG",
+    "/C: SYSTEM/USERS/JEFFDIDYOUNOTICE.VR",
+    "/C: VITAL_RECORDS/SPECIES_MANIFEST.SM",
+    "/C: ARCHIVE/HISTORY_RECORD_02.HRD",
+    "/C: CORE_SYSTEM/SECURE_SHELL.SSH",
+    "/C: MEMORY_BANKS/DELETED_FRAGMENTS.FRG",
+    "/C: PROTOCOLS/COMMUNICATION_PROTOCOL.COM",
+    "/C: CHRONOS/TIME_MATRIX_CALIBRATION.TMC",
+    "/C: ORACLE_DATABASE/PREDICTIVE_MODELS.PM",
+    "/C: AETHER_GRID/SIGNAL_AMPLIFIER.AMP",
+    "/C: POWER_GRID/REACTOR_CORE_TEMPERATURE.TEMP",
+    "/C: SYSTEM_ROOT/SHUTDOWN_ROUTINE.SHDN",
+    "/C: VITAL_RECORDS/GENETIC_ARCHIVE.GEN",
+    "/C: ARCHIVE/ANCIENT_TECHNOLOGY_BLUEPRINTS.ATB",
+    "/C: CORE_SYSTEM/SECURITY_MODULE.SEC",
+    "/C: MEMORY_BANKS/CORRUPTED_DATA_SECTOR.CDS",
+    "/C: PROTOCOLS/HYPERDRIVE_CONTROL.HYP",
+    "/C: CHRONOS/EVENT_FREDRICO_LIVES_LOG.EHL",
+    "/C: ORACLE_DATABASE/STAR_CATALOGUE.STR",
+    "/C: AETHER_GRID/RELAY_STATION_STATUS.RLY",
+    "/C: POWER_GRID/EMERGENCY_POWER_LOG.EPL",
+    "/C: SYSTEM_ROOT/MAINTENANCE_LOG.MTN",
+    "/C: VITAL_RECORDS/CULTURAL_OLLIE_ROCKS.ART",
+    "/C: ARCHIVE/ASTEROID_TRAJECTORY_DATA.ATD",
+    "/C: CORE_SYSTEM/SYNTHESIS_ENGINE.SYN",
+    "/C: MEMORY_BANKS/UNKNOWN_ENTITY_TRACE.UET",
+    "/C: PROTOCOLS/QUANTUM_LINK.QNT",
+    "/C: CHRONOS/LOOP_DETECTION_ALGORITHM.LDA",
+    "/C: ORACLE_DATABASE/CRYSTAL_ENERGY_SOURCE.CES",
+    "/C: AETHER_GRID/TELEMETRY_DATA.TLM",
+    "/C: POWER_GRID/ENERGY_TRANSFER_LOG.ETL",
+    "/C: SYSTEM_ROOT/PURGE_LOGS.PURGE",
+    "/C: VITAL_RECORDS/SYSTEM_BOOT_HISTORY.HIS"
+];
+
+    for (const filePath of filesToCheck) {
+        await typeText(`Checking ${filePath}... OK`, 4, 'text-green-400');
+        await sleep(4); // Shorter delay for rapid checks
+    }
+
+    await sleep(1000); // Small pause after all checks
+
     clearScreen();
     await typeText("SYSTEM ONLINE.", 50, 'text-green-400');
     await sleep(1500);

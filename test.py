@@ -162,7 +162,7 @@ def main_start_up_menu():
     time.sleep(2)
     clear_screen()
     type_text("What is your name, Operator?", delay=0.05, color = YELLOW)
-    player_name = input(">>> ").strip()
+    player_name = input(">>> ").strip() # Player name is obtained here
     clear_screen()
     type_text(f"HELLO, {player_name.upper()}.", delay=0.05)
     time.sleep(1.5)
@@ -207,11 +207,7 @@ def main_start_up_menu():
     type_text("That means...", delay=0.05, color= YELLOW)
     time.sleep(1.5)
     clear_screen()
-    # Corrected calculation: It has been (current_year - original_activation_year) years since activation
-    # Assuming the original activation year was (player_year_int - 500) from the previous logic.
-    # The elapsed time is simply 500 years as per the previous line's premise.
-    # Or, if player_year_int is the current year, then the computer was activated 500 years prior to that.
-    # So, the duration is always 500.
+    # The elapsed time is fixed at 500 years as per the premise.
     type_text(f"It has been {500} years since I was last activated.", delay=0.05, color= YELLOW)
     time.sleep(3) # Added a pause after this crucial revelation
     clear_screen()
@@ -279,9 +275,10 @@ def main_start_up_menu():
     type_text("ERROR: SOME SYSTEMS NON-FUNCTIONAL.", delay=0.05, color=RED) # Red for error status
     time.sleep(2) # Added pause after the last error message
     # After diagnostics, this is where the main game flow would continue or transition to main_menu
-    main_menu() # Transition to the main menu/game loop
+    main_menu(player_name) # Passing player_name to main_menu
+    # Removed 'return player_name' as it was not being captured and could cause confusion.
 
-def main_menu():
+def main_menu(player_name): # Accepting player_name as an argument
     # Placeholder for the main menu function
     clear_screen()
     type_text("ENTERING MAIN MENU...", delay=0.05, color=GREEN)
@@ -344,6 +341,8 @@ def start_up():
     type_text("ALERT: LIMITED BATTERY POWER.", delay=0.05, color=RED) # Red for alert
     time.sleep(1.5)
     clear_screen()
+
+    # Original sequence after battery mini-game removed
     type_text("I need to regain control of my core systems.", delay=0.05, color=YELLOW) # Yellow for computer talking
     time.sleep(1.5)
     clear_screen()
@@ -398,6 +397,38 @@ def start_up():
             time.sleep(2)
             start_up() # Call start_up again to reboot and restart the sequence.
 
+def title_menu():
+    clear_screen()
+    type_text("+==================================================+", delay=0.01, color=GREEN)
+    type_text("| _____ _____ ____  __  __ ___ _   _    _    _     |", delay=0.01, color=GREEN)
+    type_text("||_   _| ____|  _ \\|  \\/  |_ _| \\ | |  / \\  | |    |", delay=0.01, color=GREEN)
+    type_text("|  | | |  _| | |_) | |\\/| || ||  \\| | / _ \\ | |    |", delay=0.01, color=GREEN)
+    type_text("|  | | | |___|  _ <| |  | || || |\\  |/ ___ \\| |___ |", delay=0.01, color=GREEN)
+    type_text("|  |_| |_____|_|_\\_\\_|__|_|___|_| \\_/_/___\\_\\_____||", delay=0.01, color=GREEN)
+    type_text("|        |  _ \\| ____| __ ) / _ \\ / _ \\_   _|      |", delay=0.01, color=GREEN)
+    type_text("|        | |_) |  _| |  _ \\| | | | | | || |        |", delay=0.01, color=GREEN)
+    type_text("|        |  _ <| |___| |_) | |_| | |_| || |        |", delay=0.01, color=GREEN)
+    type_text("|        |_| \\_\\_____|____/ \\___/ \\___/ |_|        |", delay=0.01, color=GREEN)
+    type_text("+==================================================+", delay=0.01, color=GREEN)
+    type_text("Please choose an option:", delay=0.03, color=YELLOW)
+    type_text("1. Start New Game", delay=0.03, color=YELLOW)
+    type_text("2. Load Game", delay=0.03, color=YELLOW)
+    type_text("3. Exit", delay=0.03, color=YELLOW)
+    choice = input(">>> ").strip()
+    if choice == '1':
+        start_up()
+    elif choice == '2':
+        clear_screen()
+        type_text("LOAD GAME FUNCTIONALITY NOT YET IMPLEMENTED.", delay=0.03, color=RED)
+        time.sleep(2)
+        title_menu()
+    elif choice == '3':
+        clear_screen()
+        type_text("EXITING GAME. GOODBYE.", delay=0.03, color=GREEN)
+        time.sleep(2)
+        clear_screen()
+        sys.exit()
+    clear_screen()
 
 if __name__ == "__main__":
-    start_up()
+    title_menu()

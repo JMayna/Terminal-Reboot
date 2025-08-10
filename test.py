@@ -279,18 +279,83 @@ def main_start_up_menu():
     # Removed 'return player_name' as it was not being captured and could cause confusion.
 
 def main_menu(player_name): # Accepting player_name as an argument
-    # Placeholder for the main menu function
+    while True: # Loop to keep the menu open until a valid choice is made
+        clear_screen()
+        type_text("ENTERING MAIN MENU...", delay=0.05, color=BLUE) # Changed to BLUE for system process
+        time.sleep(1) # Shortened initial delay for smoother transition
+        display_loading_animation(cycles=2, delay_frame=0.1)
+        clear_screen()
+        type_text(f"Welcome to the MAIN MENU, {player_name.upper()}. Please select an option:", delay=0.05, color=GREEN) # Greeting in GREEN
+        time.sleep(1) # Shortened delay
+        type_text("1. Check Systems Status", delay=0.03)
+        type_text("2. Access Logs", delay=0.03)
+        type_text("3. Save Game", delay=0.03)
+        type_text("4. Exit", delay=0.03)
+
+        user_input = input(">>> ").strip() # Added .strip() to clean input
+
+        if user_input == "1":
+            check_systems_status(player_name)
+        elif user_input == "2":
+            access_logs(player_name)
+        elif user_input == "3":
+            save_game(player_name)
+        elif user_input == "4":
+            exit_program()
+            break # Break the loop before exiting the program cleanly
+        else:
+            clear_screen()
+            type_text("INVALID INPUT. Please enter 1, 2, 3, or 4.", delay=0.04, color=RED) # Invalid input message in RED
+            time.sleep(1.5) # Pause to let player read the error
+
+
+def check_systems_status(player_name):
     clear_screen()
-    type_text("ENTERING MAIN MENU...", delay=0.05, color=GREEN)
+    type_text("CHECKING SYSTEMS STATUS...", delay=0.05, color=BLUE)
     time.sleep(2)
-    display_loading_animation(cycles=2, delay_frame=0.1)
     clear_screen()
-    type_text(f"Welcome to the MAIN MENU {player_name.upper()}, please select an option:", delay=0.05, color=GREEN)
+    type_text("This function is not complete.", delay=0.05, color=YELLOW) # Changed to YELLOW for generic message
     time.sleep(2)
-    type_text("1. Check Systems Status", delay=0.03)
-    type_text("2. Access Logs", delay=0.03)
-    type_text("3. Exit", delay=0.03)
-    # Further implementation of main menu options would go here
+    clear_screen()
+    # No need to return from here, just call main_menu to go back
+    main_menu(player_name)
+
+def access_logs(player_name):
+    clear_screen()
+    type_text("ACCESSING LOGS...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("This function is not complete.", delay=0.05, color=YELLOW) # Changed to YELLOW
+    time.sleep(2)
+    clear_screen()
+    main_menu(player_name)
+
+
+def save_game(player_name):
+    clear_screen()
+    type_text("SAVING GAME...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("GAME SAVED SUCCESSFULLY.", delay=0.05, color=GREEN)
+    time.sleep(2)
+    clear_screen()
+    main_menu(player_name)
+
+def exit_program():
+    clear_screen()
+    type_text("EXITING PROGRAM...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("GOODBYE.", delay=0.05, color=GREEN)
+    time.sleep(2)
+    clear_screen()
+    type_text("SYSTEM SHUTTING DOWN...", delay=0.05, color=RED)
+    time.sleep(2)
+    clear_screen()
+    type_text("SYSTEM OFFLINE.", delay=0.05, color=RED)
+    time.sleep(2)
+    clear_screen()
+    sys.exit(0) # Exit the program cleanly
 
 def start_up():
     """
@@ -444,8 +509,21 @@ def title_menu():
     time.sleep(5) # Pause to let the user see the title art before clearing
 
 
+   
 
+
+
+    type_text("/ ___||  _ \ / _ \ / _ \| |/ /\ \ / /  / ___|  / \  |  \/  | ____| |      ")
+    type_text("\___ \| |_) | | | | | | | ' /  \ V /  | |     / _ \ | |\/| |  _| | |      ")
+    type_text("___) |  __/| |_| | |_| | . \   | |   | |___ / ___ \| |  | | |___| |___   ")
+    type_text("|____/|_|  __\___/_\___/|_|\_\  |_| ___\____/_/___\_\_| _|_|_____|_____|  ")
+    type_text("    |  _ \|  _ \ / _ \|  _ \| | | |/ ___|_   _|_ _/ _ \| \ | / ___|       ")
+    type_text("    | |_) | |_) | | | | | | | | | | | |     | |  | | | | |  \| \___ \       ")
+    type_text("    |  __/|  _ <| |_| | |_| | |_| | |___  | |  | | |_| | |\  |___) |      ")
+    type_text("    |_|   |_| \\_\\___/|____/ \\___/ \\____| |_| |___\\___/|_| \\_|____/        ")
     
+    time.sleep(2) # Pause to let the user see the title art before clearing
+
     clear_screen()
     type_text("+==================================================+", delay=0.01, color=GREEN)
     type_text("| _____ _____ ____  __  __ ___ _   _    _    _     |", delay=0.01, color=GREEN)

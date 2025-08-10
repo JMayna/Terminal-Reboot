@@ -1,0 +1,27 @@
+/* Custom font for a terminal-like appearance */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap');
+body {
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: default; /* Default cursor for a clean terminal feel */
+}
+/* Hide scrollbar for a cleaner look, but allow scrolling */
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+.output-text::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+/* Ensure responsive font sizes */
+.text-typing {
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+}
+/* Applied to jumble text and ASCII art */
+.preformatted-text {
+    font-size: clamp(0.7rem, 1.8vw, 1rem);
+    white-space: pre; /* Essential for preserving all whitespace and newlines */
+    font-family: 'IBM Plex Mono', monospace; /* Ensure monospace for exact alignment */
+    overflow-x: auto; /* Allow horizontal scrolling if lines are too long */
+    word-break: normal; /* Override break-all if inherited, for pre-wrapped content */
+}

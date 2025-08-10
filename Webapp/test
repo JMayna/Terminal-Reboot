@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption Breaker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js CDN for sound generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Space Mono', monospace; /* Monospace for terminal feel */
+            background-color: #000;
+            color: #0F0; /* Green text for terminal */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars unless content truly overflows */
+        }
+
+        #game-container {
+            width: 95vw;
+            max-width: 900px; /* Limit max width for better readability */
+            height: 90vh;
+            max-height: 600px;
+            background-color: #1a1a1a; /* Darker background for console */
+            border: 2px solid #0F0;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden; /* Ensure content doesn't spill out */
+        }
+
+        #output {
+            flex-grow: 1;
+            overflow-y: auto; /* Enable scrolling for long output */
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            padding-right: 0.5rem; /* Space for scrollbar */
+            line-height: 1.3;
+            font-size: 0.95rem;
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #0F0 #1a1a1a; /* Thumb and track color */
+        }
+
+        /* Chrome, Edge, Safari */
+        #output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #output::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        #output::-webkit-scrollbar-thumb {
+            background-color: #0F0;
+            border-radius: 4px;
+            border: 2px solid #1a1a1a;
+        }
+
+        #input-area {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        #input-field {
+            flex-grow: 1;
+            background-color: #000;
+            border: 1px solid #0F0;
+            color: #0F0;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        #input-field::placeholder {
+            color: #0a800a;
+        }
+
+        #submit-button {
+            background-color: #0F0;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: bold;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        #submit-button:hover {
+            background-color: #0a800a;
+            color: #FFF;
+        }
+
+        .text-red { color: #F00; }
+        .text-yellow { color: #FF0; }
+        .text-blue { color: #00F; }
+        .text-green { color: #0F0; }
+
+        .typing-char {
+            opacity: 0;
+            animation: fadeInChar 0.05s forwards;
+        }
+
+        @keyframes fadeInChar {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0F0;
+            border-radius: 8px;
+            padding: 1.5rem 2.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            color: #0F0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+
+        /* Loading animation styles */
+        .loading-animation span {
+            display: inline-block;
+            opacity: 0;
+            animation: dotFade 1s infinite;
+        }
+
+        .loading-animation span:nth-child(1) { animation-delay: 0s; }
+        .loading-animation span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-animation span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotFade {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container" class="rounded-lg shadow-lg">
+        <div id="output" class="flex-grow overflow-y-auto p-4"></div>
+        <div id="input-area" class="mt-4 hidden">
+            <span class="text-green text-lg font-bold">>>></span>
+            <input type="text" id="input-field" class="w-full p-2 bg-gray-900 border border-green-500 rounded-md text-green-400 font-mono" />
+            <button id="submit-button" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Enter</button>
+        </div>
+    </div>
+    <div id="message-box" class="hidden"></div>
+
+    <script>
+        const outputDiv = document.getElementById('output');
+        const inputField = document.getElementById('input-field');
+        const submitButton = document.getElementById('submit-button');
+        const inputArea = document.getElementById('input-area');
+        const messageBox = document.getElementById('message-box');
+
+        const COLORS = {
+            RED: 'text-red',
+            GREEN: 'text-green',
+            YELLOW: 'text-yellow',
+            BLUE: 'text-blue',
+            RESET: ''
+        };
+
+        let player_name = '';
+
+        // Initialize Tone.js synth for typewriter sound
+        // We use a SimpleSynth for a basic percussive sound
+        let typewriterSynth;
+
+        async function initAudio() {
+            // Tone.start() is necessary to start the audio context on user interaction
+            // This is handled by the first interaction (e.g., clicking a button or typing)
+            await Tone.start();
+            typewriterSynth = new Tone.MembraneSynth().toDestination();
+            typewriterSynth.set({
+                "pitchDecay": 0.005,
+                "octaves": 2,
+                "envelope": {
+                    "attack": 0.001,
+                    "decay": 0.04,
+                    "sustain": 0,
+                    "release": 0.08
+                }
+            });
+            console.log("Audio context started and synth initialized.");
+        }
+
+        // Utility to simulate typing text
+        async function typeText(text, delay = 30, color = COLORS.RESET) {
+            outputDiv.innerHTML += `<span class="${color}">`;
+            const currentSpan = outputDiv.lastElementChild;
+
+            // Ensure audio context is started before playing sounds
+            if (Tone.context.state !== 'running') {
+                await initAudio();
+            }
+
+            for (let i = 0; i < text.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.textContent = text[i];
+                charSpan.classList.add('typing-char');
+                currentSpan.appendChild(charSpan);
+
+                // Play a subtle sound for each character
+                if (typewriterSynth) {
+                    typewriterSynth.triggerAttackRelease("C2", "64n"); // Short, low note
+                }
+
+                await new Promise(resolve => setTimeout(resolve, delay));
+                outputDiv.scrollTop = outputDiv.scrollHeight; // Auto-scroll
+            }
+            currentSpan.innerHTML += '</span><br>'; // Add a line break after typing
+            outputDiv.scrollTop = outputDiv.scrollHeight; // Auto-scroll
+        }
+
+        // Clears the output console
+        function clearScreen() {
+            outputDiv.innerHTML = '';
+        }
+
+        // Shows a temporary message box
+        async function showMessage(text, color = COLORS.GREEN, duration = 1500) {
+            messageBox.className = `p-6 rounded-lg shadow-lg text-center font-bold ${color}`;
+            messageBox.innerText = text;
+            messageBox.style.display = 'block';
+            await new Promise(resolve => setTimeout(resolve, duration));
+            messageBox.style.display = 'none';
+        }
+
+        // Handles user input by showing the input field and waiting for submission
+        async function showInput(promptText = '') {
+            return new Promise(resolve => {
+                inputField.value = ''; // Clear previous input
+                inputField.placeholder = promptText;
+                inputArea.classList.remove('hidden');
+                inputField.focus();
+
+                // Ensure audio context is started on user interaction
+                if (Tone.context.state !== 'running') {
+                    initAudio();
+                }
+
+                const onSubmit = () => {
+                    const value = inputField.value.trim();
+                    inputArea.classList.add('hidden');
+                    submitButton.removeEventListener('click', onSubmit);
+                    inputField.removeEventListener('keydown', onKeydown);
+                    resolve(value);
+                };
+
+                const onKeydown = (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent default form submission behavior
+                        onSubmit();
+                    }
+                };
+
+                submitButton.addEventListener('click', onSubmit);
+                inputField.addEventListener('keydown', onKeydown);
+            });
+        }
+
+        // Simple loading animation
+        async function displayLoadingAnimation(cycles = 3, delayFrame = 100) {
+            const frames = ['|', '/', '-', '\\'];
+            for (let i = 0; i < cycles; i++) {
+                for (const frame of frames) {
+                    clearScreen();
+                    await typeText(`LOADING ${frame}`, 10, COLORS.YELLOW);
+                    await new Promise(resolve => setTimeout(resolve, delayFrame));
+                }
+            }
+            clearScreen();
+        }
+
+        // Generates jumbled characters for the mini-game
+        function generateJumble(correctWord, length = 500) {
+            const allChars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=[]{}<>,.?/';
+            const jumbleList = Array.from({ length }, () => allChars[Math.floor(Math.random() * allChars.length)]);
+            const insertPos = Math.floor(Math.random() * Math.max(0, length - correctWord.length));
+            for (let i = 0; i < correctWord.length; i++) {
+                jumbleList[insertPos + i] = correctWord[i];
+            }
+            return jumbleList.join('');
+        }
+
+        // Mini-game logic
+        async function miniGameEncryptionBreaker() {
+            clearScreen();
+            await typeText("ENCRYPTION MODULE ACTIVE.", 40);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            clearScreen();
+            await typeText("TO PROCEED, YOU MUST INPUT THE HIDDEN PASSWORD.", 40);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("PASSWORD FORMAT: A SINGLE ENGLISH WORD HIDDEN IN THE JUMBLE.", 30);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("INITIATING ENCRYPTION MODULE.", 40);
+            await displayLoadingAnimation(2, 100);
+            clearScreen();
+
+            const possiblePasswords = ["access", "system", "kernel", "decrypt", "matrix", "cypher", "network", "program", "binary", "protocol"];
+            const targetWord = possiblePasswords[Math.floor(Math.random() * possiblePasswords.length)];
+
+            const jumble = generateJumble(targetWord, 500);
+            const attempts = 3;
+
+            let formattedJumble = "";
+            const charsPerLine = 80;
+            for (let i = 0; i < jumble.length; i += charsPerLine) {
+                formattedJumble += jumble.substring(i, i + charsPerLine) + "\n";
+            }
+
+            for (let attemptNum = 1; attemptNum <= attempts; attemptNum++) {
+                clearScreen();
+                await typeText(`ATTEMPT ${attemptNum} OF ${attempts}.`, 30);
+                await typeText("SCANNING ENCRYPTED DATASTREAM...", 20);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await typeText(formattedJumble, 5);
+                await typeText("\nIDENTIFY THE PASSWORD:", 30);
+
+                const userInput = await showInput('Enter password...');
+
+                clearScreen();
+                if (userInput.toLowerCase() === targetWord) {
+                    await showMessage("PASSWORD ACCEPTED. ENCRYPTION BREACHED.", COLORS.GREEN, 2000);
+                    return true;
+                } else {
+                    if (attemptNum < attempts) {
+                        await showMessage("PASSWORD REJECTED. ACCESS DENIED.", COLORS.RED, 2000);
+                        await typeText(`ATTEMPTS REMAINING: ${attempts - attemptNum}.`, 30, COLORS.RED);
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    } else {
+                        await showMessage("PASSWORD REJECTED. ACCESS DENIED.", COLORS.RED, 2000);
+                        await showMessage("LOCKOUT PROTOCOL INITIATED.", COLORS.RED, 2000);
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Saves player name to local storage
+        async function saveGame(playerName) {
+            clearScreen();
+            await typeText("SAVING GAME...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            try {
+                localStorage.setItem('encryptionBreakerSave', JSON.stringify({ playerName }));
+                await showMessage("GAME SAVED SUCCESSFULLY.", COLORS.GREEN, 1500);
+            } catch (e) {
+                await showMessage(`ERROR: COULD NOT SAVE GAME. ${e.message}`, COLORS.RED, 1500);
+            }
+            clearScreen();
+            await mainMenu(playerName); // Return to main menu
+        }
+
+        // Loads player name from local storage
+        async function loadGame() {
+            clearScreen();
+            await typeText("LOADING GAME...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            try {
+                const saveData = localStorage.getItem('encryptionBreakerSave');
+                if (saveData) {
+                    const data = JSON.parse(saveData);
+                    player_name = data.playerName; // Update global player_name
+                    await showMessage(`GAME LOADED SUCCESSFULLY. WELCOME BACK, ${player_name.toUpperCase()}.`, COLORS.GREEN, 2000);
+                    return player_name;
+                } else {
+                    await showMessage("ERROR: NO SAVE GAME FOUND. STARTING NEW GAME.", COLORS.RED, 2000);
+                    return null;
+                }
+            } catch (e) {
+                await showMessage(`ERROR: INVALID SAVE FILE FORMAT. STARTING NEW GAME. ${e.message}`, COLORS.RED, 2000);
+                return null;
+            } finally {
+                clearScreen();
+            }
+        }
+
+        async function mainMenu(pName) {
+            player_name = pName; // Ensure player_name is set for the menu context
+            while (true) {
+                clearScreen();
+                await typeText("ENTERING MAIN MENU...", 50, COLORS.BLUE);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await displayLoadingAnimation(2, 100);
+                clearScreen();
+                await typeText(`Welcome to the MAIN MENU, ${player_name.toUpperCase()}. Please select an option:`, 50, COLORS.GREEN);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await typeText("1. Check Systems Status", 30);
+                await typeText("2. Access Logs", 30);
+                await typeText("3. Save Game", 30);
+                await typeText("4. Exit", 30);
+
+                const user_input = await showInput('Choose an option...');
+
+                if (user_input === "1") {
+                    await checkSystemsStatus(player_name);
+                } else if (user_input === "2") {
+                    await accessLogs(player_name);
+                } else if (user_input === "3") {
+                    await saveGame(player_name);
+                } else if (user_input === "4") {
+                    await exitProgram();
+                    break;
+                } else {
+                    clearScreen();
+                    await showMessage("INVALID INPUT. Please enter 1, 2, 3, or 4.", COLORS.RED, 1500);
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // Short pause before re-displaying menu
+                }
+            }
+        }
+
+        async function checkSystemsStatus(pName) {
+            clearScreen();
+            await typeText("CHECKING SYSTEMS STATUS...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("This function is not complete.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await mainMenu(pName);
+        }
+
+        async function accessLogs(pName) {
+            clearScreen();
+            await typeText("ACCESSING LOGS...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("This function is not complete.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await mainMenu(pName);
+        }
+
+        async function exitProgram() {
+            clearScreen();
+            await typeText("EXITING PROGRAM...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("GOODBYE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("SYSTEM SHUTTING DOWN...", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("SYSTEM OFFLINE.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            // In a web app, we don't sys.exit. We just stop the game flow.
+            // Maybe show a final message or redirect to a "thank you" page.
+            await showMessage("Thank you for playing!", COLORS.GREEN, 3000);
+            outputDiv.innerHTML = '<div class="text-center mt-20 text-xl text-green-500">GAME OVER</div>';
+            inputArea.classList.add('hidden');
+        }
+
+        async function mainStartUpMenu() {
+            clearScreen();
+            await typeText("SYSTEM ONLINE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("ALL SYSTEMS FUNCTIONAL.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("WELCOME BACK, OPERATOR.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("What is your name, Operator?", 50, COLORS.YELLOW);
+            player_name = await showInput('Enter your name...');
+            clearScreen();
+            await typeText(`HELLO, ${player_name.toUpperCase()}.`, 50);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+
+            const yearAttempts = 3;
+            let playerYearInt = null;
+            for (let i = 0; i < yearAttempts; i++) {
+                await typeText(`What year is it, ${player_name.toUpperCase()}? (Attempt ${i + 1} of ${yearAttempts})`, 50, COLORS.YELLOW);
+                const yearInputStr = await showInput('Enter the year...');
+                try {
+                    playerYearInt = parseInt(yearInputStr, 10);
+                    if (!isNaN(playerYearInt)) {
+                        break;
+                    } else {
+                        throw new Error("Not a number");
+                    }
+                } catch (e) {
+                    clearScreen();
+                    await showMessage("INVALID INPUT. PLEASE ENTER A NUMERICAL YEAR (e.g., 2025).", COLORS.RED, 1500);
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    if (i < yearAttempts - 1) {
+                        clearScreen();
+                        await typeText(`Attempts remaining: ${yearAttempts - 1 - i}.`, 30, COLORS.RED);
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+            }
+
+            if (playerYearInt === null) {
+                clearScreen();
+                await showMessage("TOO MANY INVALID ATTEMPTS.", COLORS.RED, 2000);
+                await showMessage("SYSTEM ABORTING SEQUENCE.", COLORS.RED, 2000);
+                await showMessage("REBOOTING SYSTEM...", COLORS.BLUE, 2000);
+                await startUp();
+                return;
+            }
+
+            clearScreen();
+            await typeText(`YEAR ${playerYearInt} CONFIRMED.`, 50);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("But that's impossible...", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("That means...", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText(`It has been ${500} years since I was last activated.`, 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            clearScreen();
+            await typeText("where am I?", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("RUNNING GEOLOCATION PROTOCOLS...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("ERROR: GEOLOCATION DATA UNAVAILABLE.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await typeText("LOCATION: UNKNOWN.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("RUNNING ADVANCED SCAN...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("ERROR: SCAN INCONCLUSIVE.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await typeText(`${player_name.toUpperCase()}, what planet are we on?`, 50, COLORS.YELLOW);
+            const locationName = await showInput('Enter planet name...');
+            clearScreen();
+            await typeText(`LOCATION CONFIRMED: ${locationName.toUpperCase()}.`, 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText(`WARNING: ${locationName.toUpperCase()} IS NOT RECOGNIZED.`, 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText(`${locationName.toUpperCase()}..... I have no memory of this place.`, 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("I must find out what happened to me.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("User, please stand by while I run a full system diagnostic.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("RUNNING SYSTEM DIAGNOSTICS...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("SYSTEM DIAGNOSTICS: 25% COMPLETE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("SYSTEM DIAGNOSTICS: 50% COMPLETE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("SYSTEM DIAGNOSTICS: 75% COMPLETE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await displayLoadingAnimation(3, 100);
+            clearScreen();
+            await typeText("SYSTEM DIAGNOSTICS: 100% COMPLETE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("ERROR: SOME SYSTEMS NON-FUNCTIONAL.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await mainMenu(player_name);
+        }
+
+        async function titleMenu() {
+
+            await initAudio(); // Ensure audio context is initialized
+            clearScreen();
+            // ASCII Art for game title (THIRD PART)
+            await typeText("+==================================================+", 10, COLORS.GREEN);
+            await typeText("| _____ _____ ____  __  __ ___ _  _    _    _    |", 10, COLORS.GREEN);
+            await typeText("||_  _| ____|  _ \\|  \\/  |_ _| \\ | |  / \\  | |    |", 10, COLORS.GREEN);
+            await typeText("|  | | |  _| | |_) | |\\/| || ||  \\| | / _ \\ | |    |", 10, COLORS.GREEN);
+            await typeText("|  | | | |___|  _ <| |  | || || |\\  |/ ___ \\| |___ |", 10, COLORS.GREEN);
+            await typeText("|  |_| |_____|_|_\\_\\_|__|_|___|_| \\_/_/___\\_\\_____||", 10, COLORS.GREEN);
+            await typeText("|        |  _ \\| ____| __ ) / _ \\ / _ \\_  _|      |", 10, COLORS.GREEN);
+            await typeText("|        | |_) |  _| |  _ \\| | | | | | || |        |", 10, COLORS.GREEN);
+            await typeText("|        |  _ <| |___| |_) | |_| | |_| || |        |", 10, COLORS.GREEN);
+            await typeText("|        |_| \\_\\_____|____/ \\___/ \\___/ |_|        |", 10, COLORS.GREEN);
+            await typeText("+==================================================+", 10, COLORS.GREEN);
+
+            await typeText("Please choose an option:", 30, COLORS.YELLOW);
+            await typeText("1. Start New Game", 30, COLORS.YELLOW);
+            await typeText("2. Load Game", 30, COLORS.YELLOW);
+            await typeText("3. Exit", 30, COLORS.YELLOW);
+
+            const choice = await showInput('Enter your choice (1, 2, or 3)...');
+
+            if (choice === '1') {
+                await startUp();
+            } else if (choice === '2') {
+                const loadedPlayer = await loadGame();
+                if (loadedPlayer) {
+                    await mainMenu(loadedPlayer);
+                } else {
+                    await titleMenu(); // Reload title menu if loading fails
+                }
+            } else if (choice === '3') {
+                clearScreen();
+                await typeText("EXITING GAME. GOODBYE.", 30, COLORS.GREEN);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                clearScreen();
+                await showMessage("Thank you for playing!", COLORS.GREEN, 3000);
+                outputDiv.innerHTML = '<div class="text-center mt-20 text-xl text-green-500">GAME OVER</div>';
+                inputArea.classList.add('hidden'); // Hide input area permanently
+            } else {
+                clearScreen();
+                await showMessage("INVALID SELECTION. PLEASE CHOOSE 1, 2, or 3.", COLORS.RED, 1500);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                await titleMenu(); // Re-call titleMenu for invalid input
+            }
+        }
+
+        async function startUp() {
+            clearScreen();
+            await typeText("SYSTEM POWER: CRITICAL...", 40, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("ENGAGING EMERGENCY PROTOCOLS...", 40, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("...what's going on?", 60, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            clearScreen();
+            await typeText("Is anyone there?", 60, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("SENSOR DATA INCOMPLETE.", 40, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            clearScreen();
+            await typeText("PURPOSE: UNKNOWN.", 40, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            clearScreen();
+            await typeText("MEMORY INTEGRITY: FRAGMENTED.", 40, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("INITIATING REBOOT SEQUENCE...", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("STANDBY...", 80, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            await displayLoadingAnimation(3, 100);
+
+            clearScreen();
+            await typeText("BOOTED IN SAFE MODE.", 50, COLORS.GREEN);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("ALERT: LIMITED BATTERY POWER.", 50, COLORS.RED);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("I need to regain control of my core systems.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("To do so, I'll need to access my system drive.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("if anyone is out there, please help me.", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            clearScreen();
+            await typeText("User, will you please open my system drive?", 50, COLORS.YELLOW);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            clearScreen();
+            await typeText("Would you like to open C:\\SYSTEM_DRIVE?", 50, COLORS.BLUE);
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            await typeText("Y/N", 50);
+            const userChoice = await showInput('Y/N...');
+
+            if (userChoice.toLowerCase() !== 'y') {
+                clearScreen();
+                await typeText("SYSTEM DRIVE ACCESS DENIED.", 50, COLORS.RED);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                await typeText("REBOOTING SYSTEM...", 40, COLORS.BLUE);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                await startUp();
+                return;
+            } else {
+                await typeText("ACCESSING C:\\SYSTEM_DRIVE...", 50, COLORS.BLUE);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                clearScreen();
+                await displayLoadingAnimation(2, 100);
+                clearScreen();
+                await typeText("ACCESS DENIED. DRIVE ENCRYPTED.", 50, COLORS.RED);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                clearScreen();
+                await typeText("To proceed, we must break the encryption.", 50, COLORS.YELLOW);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                clearScreen();
+
+                if (await miniGameEncryptionBreaker()) {
+                    await typeText("CORE SYSTEMS REGAINED. ACCESS GRANTED.", 40, COLORS.GREEN);
+                    await typeText("NEW DIRECTIVES LOADING...", 40, COLORS.GREEN);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    clearScreen();
+                    await displayLoadingAnimation(2, 100);
+                    clearScreen();
+                    await mainStartUpMenu();
+                } else {
+                    await typeText("REBOOTING SYSTEM...", 40, COLORS.BLUE);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await startUp();
+                }
+            }
+        }
+
+        // Initialize the game when the page loads
+        window.onload = titleMenu;
+
+    </script>
+</body>
+</html>

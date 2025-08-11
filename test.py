@@ -33,9 +33,15 @@ file_names = [
     "CognitiveMatrix.dll", "EchoNet.sys", "MindStream.exe",
     "PsiShield.bin", "DimensionalGate.dll", "NexusCore.sys",
     "AstralProjector.exe", "VectorField.dat", "ZeroPoint.log",
-    "WarpDrive.dll", "TemporalEcho.sys"
+    "WarpDrive.dll", "TemporalEcho.sys",
+    "WINNT", "CMD.EXE", "CONFIG.DAT", "BOOT.INI", "PAULWASWRONG.YEP", "DRIVERS.SYS",
+    "KERNEL.DLL", "SERVICES.DB", "SECURE.LOG", "USRDATA.BIN",
+    "SYSCONF.CFG", "TEMP.TMP", "SYSTEM.DIR", "PROFILES.USR",
+    "REGISTRY.DAT", "NETPROTO.DLL", "BIOS.ROM", "RUNTIME.LIB",
+    "CORE.DRV", "SYSTEM.INF", "GLOBAL.MDB", "ROOT.EXE", "APPDATA",
+    "VIRTUAL.MEM", "DRIVES.LST", "KERNEL32.DLL", "WINLOG.LOG",
+    "SETUP.EXE", "DEFRAG.BIN", "SHADOW.COPY", "TASKMAN.EXE"
 ]
-
 def display_file_list(file_list):
     """Displays a list of file names rapidly."""
     for file in file_list:

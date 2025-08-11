@@ -9,6 +9,8 @@ const messageContent = document.getElementById('message-content');
 const messageOkButton = document.getElementById('message-ok-button');
 const loadingOverlay = document.getElementById('loading-overlay');
 const loadingFrame = document.getElementById('loading-frame');
+// Get a reference to the main game container for background changes
+const gameContainer = document.querySelector('.relative.bg-gray-800');
 
 // Global state
 let currentPromptResolver = null; // Used to resolve the promise for getUserInput
@@ -154,6 +156,48 @@ userInput.addEventListener('keydown', (event) => {
 skipButton.addEventListener('click', () => {
     skipTyping = true;
 });
+
+// --- New Visual Effect Function ---
+
+/**
+ * Emulates an old-school boot sequence with color changes.
+ */
+async function emulateBootSequenceColors() {
+    const colorSequences = [
+        { bg: 'bg-black', text: 'text-gray-300' }, // Dark, almost off
+        { bg: 'bg-red-900', text: 'text-red-300' }, // Red error
+        { bg: 'bg-yellow-900', text: 'text-yellow-300' }, // Yellow warning
+        { bg: 'bg-blue-900', text: 'text-blue-300' }, // Blue processing
+        { bg: 'bg-green-900', text: 'text-green-300' } // Green success
+    ];
+
+    // Store original classes to revert later
+    const originalGameContainerClasses = gameContainer.className;
+    const originalOutputDivClasses = outputDiv.className;
+
+    for (const seq of colorSequences) {
+        // Remove previous background and text colors from both elements
+        gameContainer.classList.remove('bg-black', 'bg-red-900', 'bg-yellow-900', 'bg-blue-900', 'bg-green-900', 'bg-gray-800');
+        outputDiv.classList.remove('bg-black', 'bg-red-900', 'bg-yellow-900', 'bg-blue-900', 'bg-green-900', 'bg-gray-900'); // Added bg-gray-900 and the other bg-colors for outputDiv
+
+        outputDiv.classList.remove('text-gray-300', 'text-red-300', 'text-yellow-300', 'text-blue-300', 'text-green-300', 'text-green-400');
+        
+        // Add current sequence's classes to both elements
+        gameContainer.classList.add(seq.bg);
+        outputDiv.classList.add(seq.bg); // Apply background to outputDiv
+        outputDiv.classList.add(seq.text);
+        
+        // Brief flash
+        await sleep(150);
+        clearScreen(); // Clear between flashes
+    }
+
+    // Revert to original styling for both elements
+    gameContainer.className = originalGameContainerClasses;
+    outputDiv.className = originalOutputDivClasses; // This will restore both text and background of outputDiv
+    clearScreen(); // Clear screen after boot sequence
+}
+
 
 // --- Game Logic Functions (Converted from Python) ---
 
@@ -654,6 +698,8 @@ async function titleMenu() {
  * If the mini-game fails, it simulates a full system reboot.
  */
 async function startUp() {
+    await emulateBootSequenceColors(); // Call the new color effect here!
+
     clearScreen();
     await typeText("SYSTEM POWER: CRITICAL...", 40, 'text-red-400');
     await sleep(1500);

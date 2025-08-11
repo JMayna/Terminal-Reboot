@@ -20,6 +20,28 @@ BG_GREEN = "\033[42m"
 BG_RED = "\033[41m"
 BG_YELLOW = "\033[43m"
 
+
+file_names = [
+    "CoreKernel.dll", "SystemIntegrity.exe", "SecurityProtocol.sys",
+    "AccessControl.dat", "EncryptionManager.dll", "BootSequence.bin",
+    "DriverValidator.exe", "NetGuard.sys", "MemoryManager.dll",
+    "DataStream.log", "Hypervisor.exe", "NeuralLink.dll",
+    "QuantumCore.sys", "ChronoSync.dat", "SubspaceComm.exe",
+    "AetherEngine.dll", "BioMetricScanner.sys", "ExoShell.bin",
+    "GravityRegulator.exe", "PhaseShift.log", "OmniSensor.dll",
+    "TemporalStabilizer.sys", "RealityForge.exe", "SingularityPoint.dat",
+    "CognitiveMatrix.dll", "EchoNet.sys", "MindStream.exe",
+    "PsiShield.bin", "DimensionalGate.dll", "NexusCore.sys",
+    "AstralProjector.exe", "VectorField.dat", "ZeroPoint.log",
+    "WarpDrive.dll", "TemporalEcho.sys"
+]
+
+def display_file_list(file_list):
+    """Displays a list of file names rapidly."""
+    for file in file_list:
+        type_text(file, delay=0.005, color=GREEN)
+    print() # Add a blank line for readability after the list
+
 def type_text(text, delay=0.03, color=RESET):
     """Simulates typing text character by character with optional color."""
     sys.stdout.write(color)
@@ -56,22 +78,21 @@ def display_loading_animation(cycles=3, delay_frame=0.1):
             time.sleep(delay_frame)
     clear_screen()
 
-# Removed flash_background_colors as it was causing issues in some terminals and is not critical
-# def flash_background_colors(colors, flashes=3, delay_per_flash=0.08):
-#     """
-#     Flashes the terminal background through a sequence of colors.
-#     Clears the screen with each flash to ensure full background color change.
-#     """
-#     sys.stdout.write(RESET) # Ensure no lingering foreground color
-#     for _ in range(flashes):
-#         for color_code in colors:
-#             sys.stdout.write(color_code)
-#             sys.stdout.write("\033[H\033[J") # Move cursor to home, clear entire screen
-#             sys.stdout.flush()
-#             time.sleep(delay_per_flash)
-#     sys.stdout.write(RESET) # Ensure final reset of all formatting
-#     sys.stdout.flush()
-#     clear_screen() # Clear one more time to prepare for next normal text
+def flash_background_colors(colors, flashes=3, delay_per_flash=0.08):
+    """
+    Flashes the terminal background through a sequence of colors.
+    Clears the screen with each flash to ensure full background color change.
+    """
+    sys.stdout.write(RESET) # Ensure no lingering foreground color
+    for _ in range(flashes):
+        for color_code in colors:
+            sys.stdout.write(color_code)
+            sys.stdout.write("\033[H\033[J") # Move cursor to home, clear entire screen
+            sys.stdout.flush()
+            time.sleep(delay_per_flash)
+    sys.stdout.write(RESET) # Ensure final reset of all formatting
+    sys.stdout.flush()
+    clear_screen() # Clear one more time to prepare for next normal text
 
 
 def mini_game_encryption_breaker():
@@ -237,7 +258,7 @@ def exit_program():
     type_text("GOODBYE.", delay=0.05, color=GREEN)
     time.sleep(2)
     clear_screen()
-    type_text("SYSTEM SHUTTING DOWN...", delay=0.05, color=RED)
+    type_text("SYSTEM SHUTTING DOWN...", delay=0.05, color=YELLOW)
     time.sleep(2)
     clear_screen()
     type_text("SYSTEM OFFLINE.", delay=0.05, color=RED)
@@ -583,6 +604,10 @@ def main_start_up_menu():
         type_text("SYSTEM ABORTING SEQUENCE.", delay=0.05, color=RED)
         time.sleep(2)
         type_text("REBOOTING SYSTEM...", delay=0.04, color= BLUE)
+        clear_screen()
+        time.sleep(2)
+        flash_background_colors([RED, GREEN, BLUE], flashes=3, delay_per_flash=0.08)
+        clear_screen()
         time.sleep(2)
         start_up()
         return
@@ -670,10 +695,13 @@ def start_up():
     Handles the initial boot sequence and then starts the encryption mini-game.
     If the mini-game fails, it simulates a full system reboot.
     """
+    flash_background_colors([BG_RED, BG_GREEN, BG_BLUE], flashes=3, delay_per_flash=0.08)
     clear_screen()
     type_text("SYSTEM POWER: CRITICAL...", delay=0.04, color=RED)
     time.sleep(1.5)
     clear_screen()
+    flash_background_colors([BG_RED, BG_GREEN, BG_BLUE], flashes=3, delay_per_flash=0.08)
+    
     type_text("ENGAGING EMERGENCY PROTOCOLS...", delay=0.04, color = RED)
     time.sleep(1.5)
     clear_screen()
@@ -697,6 +725,7 @@ def start_up():
     clear_screen()
     type_text("STANDBY...", delay=0.08, color=BLUE)
     time.sleep(1.5)
+    flash_background_colors([BG_RED, BG_GREEN, BG_BLUE], flashes=3, delay_per_flash=0.08)
 
     display_loading_animation(cycles=3, delay_frame=0.1)
 
@@ -746,8 +775,9 @@ def start_up():
         clear_screen()
 
         if mini_game_encryption_breaker():
-            type_text("CORE SYSTEMS REGAINED. ACCESS GRANTED.", delay=0.04, color=GREEN)
-            type_text("NEW DIRECTIVES LOADING...", delay=0.04, color= GREEN)
+            type_text("ENCRYPTION BYPASSED.", delay=0.04, color=GREEN)
+            type_text("LOADING C:\\SYSTEM_DRIVE...", delay=0.04, color= GREEN)
+            display_file_list(file_names)
             time.sleep(2)
             clear_screen()
             display_loading_animation(cycles=2, delay_frame=0.1)

@@ -534,10 +534,69 @@ def check_systems_status(player_name):
     type_text("CHECKING SYSTEMS STATUS...", delay=0.05, color=BLUE)
     time.sleep(2)
     clear_screen()
-    type_text("This function is not complete.", delay=0.05, color=YELLOW)
+    type_text("Please choose an option:", delay=0.05, color=GREEN)
+    time.sleep(1)
+    type_text("1. Communications System", delay=0.03, color=RED)
+    type_text("2. Power Grid", delay=0.03, color=RED)
+    type_text("3. Life Support", delay=0.03, color=RED)
+    type_text("4. Navigation System", delay=0.03, color=RED)
+    type_text("5. Back to Main Menu", delay=0.03, color=GREEN)
+    choice = input(">>> ").strip()
+    if choice == '1':
+        check_communications_system(player_name)
+    elif choice == '2':
+        check_power_grid(player_name)
+    elif choice == '3':
+        check_life_support(player_name)
+    elif choice == '4':
+        check_navigation_system(player_name)
+    elif choice == '5':
+        main_menu(player_name)
+    else:
+        clear_screen()
+        type_text("INVALID SELECTION. PLEASE CHOOSE A VALID OPTION.", delay=0.03, color=RED)
+        time.sleep(1.5)
+        check_systems_status(player_name)
+
+
+def check_communications_system(player_name):
+    clear_screen()
+    type_text("CHECKING COMMUNICATIONS SYSTEM...", delay=0.05, color=BLUE)
     time.sleep(2)
     clear_screen()
+    type_text("COMMUNICATIONS SYSTEM STATUS: OFFLINE", delay=0.05, color=RED)
+    time.sleep(1.5)
     main_menu(player_name)
+
+def check_power_grid(player_name):
+    clear_screen()
+    type_text("CHECKING POWER GRID...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("POWER GRID STATUS: OFFLINE", delay=0.05, color=RED)
+    time.sleep(1.5)
+    main_menu(player_name)
+
+def check_life_support(player_name):
+    clear_screen()
+    type_text("CHECKING LIFE SUPPORT...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("LIFE SUPPORT STATUS: OFFLINE", delay=0.05, color=RED)
+    time.sleep(1.5)
+    main_menu(player_name)
+
+def check_navigation_system(player_name):
+    clear_screen()
+    type_text("CHECKING NAVIGATION SYSTEM...", delay=0.05, color=BLUE)
+    time.sleep(2)
+    clear_screen()
+    type_text("NAVIGATION SYSTEM STATUS: OFFLINE", delay=0.05, color=RED)
+    time.sleep(1.5)
+    main_menu(player_name)
+
+
+    
 
 def access_logs(player_name):
     clear_screen()
